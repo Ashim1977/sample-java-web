@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: myapp2
+objects:
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: myapp2
+    name: myapp2
+  spec:
+    replicas: 1
+    selector:
+      app: myapp2
+      deploymentconfig: myapp2
+    strategy:
+      resources: {}
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: myapp2
+          deploymentconfig: myapp2
+      spec:
+        containers:
+        - name: myapp2
+          image: image-registry.openshift-image-registry.svc:5000/openshift/myapp2:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+          resources:
+            limits:
+              cpu: 200m
+              memory: 512Mi
+            requests:
+              cpu: 200m
+              memory: 512Mi
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - myapp2
+        from:
+          kind: ImageStreamTag
+          name: myapp2:1.0
+      type: ImageChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: myapp2
+    name: myapp2
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: myapp2
+      deploymentconfig: myapp2
+  status:
+    loadBalancer: {}
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    labels:
+      app: myapp2
+    name: myapp2
+  spec:
+    host: myapp2-ashim1977-dev.apps.sandbox-m2.ll9k.p1.openshiftapps.com
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: myapp2
+      weight: 100
+    wildcardPolicy: None
