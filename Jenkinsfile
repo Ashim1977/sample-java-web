@@ -14,7 +14,7 @@ pipeline {
     
     agent {
       node {
-        label 'java'
+        label 'maven'
       }
     }
 
